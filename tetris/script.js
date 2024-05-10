@@ -1,4 +1,3 @@
-// Game board setup
 const BOARD_WIDTH = 10;
 const BOARD_HEIGHT = 20;
 const board = [];
@@ -6,7 +5,7 @@ const bgm = document.createElement("audio");
 const breakSound = document.createElement("audio");
 const drop = document.createElement("audio");
 let rotatedShape;
-let timer; // 추가: 타이머 변수 선언
+let timer;
 
 bgm.setAttribute("src", "./assets/bgm.mp3");
 bgm.muted = true;
@@ -17,7 +16,6 @@ breakSound.muted = true;
 drop.setAttribute("src", "./assets/drop.mp3");
 drop.muted = true;
 
-// init board
 for (let row = 0; row < BOARD_HEIGHT; row++) {
   board[row] = [];
   for (let col = 0; col < BOARD_WIDTH; col++) {
@@ -25,7 +23,6 @@ for (let row = 0; row < BOARD_HEIGHT; row++) {
   }
 }
 
-// Tetrominoes
 const tetrominoes = [
   {
     shape: [
@@ -72,7 +69,6 @@ const tetrominoes = [
   { shape: [[7, 7, 7, 7]], color: "#00b5ff" },
 ];
 
-// Tetromino randomizer
 function randomTetromino() {
   const index = Math.floor(Math.random() * tetrominoes.length);
   const tetromino = tetrominoes[index];
@@ -81,15 +77,13 @@ function randomTetromino() {
     shape: tetromino.shape,
     color: tetromino.color,
     row: 0,
-    col: randomCol, // 수정된 부분
+    col: randomCol,
   };
 }
 
-// Current tetromino
 let currentTetromino = randomTetromino();
 let currentGhostTetromino;
 
-// Draw tetromino
 function drawTetromino() {
   const shape = currentTetromino.shape;
   const color = currentTetromino.color;
@@ -111,7 +105,6 @@ function drawTetromino() {
   }
 }
 
-// Erase tetromino from board
 function eraseTetromino() {
   for (let i = 0; i < currentTetromino.shape.length; i++) {
     for (let j = 0; j < currentTetromino.shape[i].length; j++) {
@@ -128,7 +121,6 @@ function eraseTetromino() {
   }
 }
 
-// Check if tetromino can move in the specified direction
 function canTetrominoMove(rowOffset, colOffset) {
   for (let i = 0; i < currentTetromino.shape.length; i++) {
     for (let j = 0; j < currentTetromino.shape[i].length; j++) {
@@ -137,10 +129,9 @@ function canTetrominoMove(rowOffset, colOffset) {
         let col = currentTetromino.col + j + colOffset;
 
         if (row >= BOARD_HEIGHT || col < 0 || col >= BOARD_WIDTH || (row >= 0 && board[row][col] !== 0)) {
-          if (rowOffset === 1) { // 아래로 이동하는 경우에만 타이머 설정
+          if (rowOffset === 1) {
             clearTimeout(timer);
-            timer = setTimeout(lockTetromino, 2000); // 2초 타이머 설정
-          }
+            timer = setTimeout(lockTetromino, 2000);          }
           return false;
         }
       }
@@ -149,7 +140,6 @@ function canTetrominoMove(rowOffset, colOffset) {
   return true;
 }
 
-// Check if tetromino can rotate
 function canTetrominoRotate() {
   for (let i = 0; i < rotatedShape.length; i++) {
     for (let j = 0; j < rotatedShape[i].length; j++) {
@@ -157,12 +147,10 @@ function canTetrominoRotate() {
         let row = currentTetromino.row + i;
         let col = currentTetromino.col + j;
 
-        // Check if the rotated tetromino is within the bounds of the board
         if (row < 0 || row >= BOARD_HEIGHT || col < 0 || col >= BOARD_WIDTH) {
           return false;
         }
-
-        // Check if the rotated tetromino overlaps with existing blocks on the board
+        
         if (row >= 0 && board[row][col] !== 0) {
           return false;
         }
@@ -173,7 +161,6 @@ function canTetrominoRotate() {
 }
 
 function lockTetromino() {
-  // Add the tetromino to the board
   for (let i = 0; i < currentTetromino.shape.length; i++) {
     for (let j = 0; j < currentTetromino.shape[i].length; j++) {
       if (currentTetromino.shape[i][j] !== 0) {
@@ -184,17 +171,13 @@ function lockTetromino() {
     }
   }
 
-  // Check if any rows need to be cleared
   let rowsCleared = clearRows();
   if (rowsCleared > 0) {
-    // updateScore(rowsCleared);
+    //퍼펙트 클리어코드부분
   }
 
-  // Create a new tetromino
-  // Current tetromino
   currentTetromino = randomTetromino();
 
-  // 타이머 초기화
   clearTimeout(timer);
   timer = setTimeout(moveTetromino, 500);
 }
@@ -202,7 +185,6 @@ function lockTetromino() {
 function clearRows() {
   let rowsCleared = 0;
 
-  // 아래에서부터 검사하면서 완전한 줄을 찾아서 지웁니다.
   for (let y = BOARD_HEIGHT - 1; y >= 0; y--) {
     let rowFilled = true;
 
@@ -249,7 +231,6 @@ function clearRows() {
   return rowsCleared;
 }
 
-// Rotate the tetromino
 function rotateTetromino() {
   rotatedShape = [];
   for (let i = 0; i < currentTetromino.shape[0].length; i++) {
@@ -260,7 +241,6 @@ function rotateTetromino() {
     rotatedShape.push(row);
   }
 
-  // Check if the rotated tetromino can be placed
   if (canTetrominoRotate()) {
     eraseTetromino();
     currentTetromino.shape = rotatedShape;
@@ -270,7 +250,6 @@ function rotateTetromino() {
   moveGhostTetromino();
 }
 
-// Move the tetromino
 function moveTetromino(direction) {
   let row = currentTetromino.row;
   let col = currentTetromino.col;
@@ -305,13 +284,12 @@ function moveTetromino(direction) {
 
   moveGhostTetromino();
 
-  // 아래로 이동할 때마다 타이머 초기화
   clearTimeout(timer);
   timer = setTimeout(moveTetromino, 500);
 }
 
 drawTetromino();
-timer = setTimeout(moveTetromino, 500); // 초기 타이머 설정
+timer = setTimeout(moveTetromino, 500);
 
 document.addEventListener("keydown", handleKeyPress);
 
@@ -337,7 +315,6 @@ function handleKeyPress(event) {
   }
 }
 
-// sound init
 document.body.addEventListener("click", () => {
   bgm.play();
   bgm.muted = false;
@@ -361,7 +338,6 @@ function dropTetromino() {
   lockTetromino();
 }
 
-// Draw Ghost tetromino
 function drawGhostTetromino() {
   const shape = currentGhostTetromino.shape;
   const color = "rgba(255,255,255,0.5)";
